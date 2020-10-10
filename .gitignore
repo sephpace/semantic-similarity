@@ -7,3 +7,9 @@ __pycache__/
 # Training dataset
 data/test.csv
 data/train.csv
+
+
+# GloVe
+glove/glove.*.txt
+glove/glove.*.zip
+
