@@ -1,0 +1,1 @@
+GLOVE_PATH = 'glove/glove.6B.50d.txt'
