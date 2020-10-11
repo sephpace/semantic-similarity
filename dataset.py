@@ -6,6 +6,7 @@ Implemented in Pytorch by Seph Pace.
 """
 
 import pandas as pd
+import torch
 from torch.utils.data import Dataset
 
 
@@ -43,8 +44,10 @@ class TextSimilarityDataset(Dataset):
         columns = ('description_x', 'description_y', 'same_security')
 
         # Combine the data into tuples
-        self.data = list(zip(*(data_frame[col] for col in columns)))
-
+        self.data = []
+        for seq1, seq2, target in zip(*(data_frame[col] for col in columns)):
+            target = torch.tensor(target, dtype=torch.float)
+            self.data.append((seq1, seq2, target))
 
     def __getitem__(self, idx):
         """

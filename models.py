@@ -5,6 +5,7 @@ Email:  sephpace@gmail.com
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from settings import GLOVE_PATH
 
@@ -81,13 +82,57 @@ class MeanCenter(nn.Module):
         Returns:
             (Tensor): The mean center (N, E).
         """
-        return inputs.sum(1) / inputs.size(1)
+        return inputs.sum(1) / inputs.shape[1]
+
+
+class SimpleSemanticSimilarity(nn.Module):
+    """
+    Calculates the semantic similarity between two sequences of words
+    by calculating their mean center.
+    """
+
+    def __init__(self, path=GLOVE_PATH):
+        """
+        Constructor.
+
+        Args:
+            path (str): The path to a GloVe file.
+        """
+        super().__init__()
+        self.embedding = SimpleGloveEmbedding(path)
+        self.mc = MeanCenter()
+
+    def forward(self, seq1, seq2):
+        """
+        Forward pass.
+
+        Args:
+            seq1 (str): The first sequence.
+            seq2 (str): The second sequence.
+
+        Returns:
+            (Tensor): A single-item tensor containing the semantic similarity
+                      value.
+        """
+        # Find the center of each sequence in latent space
+        embed1 = self.embedding(seq1).unsqueeze(0)
+        center1 = self.mc(embed1)
+
+        embed2 = self.embedding(seq2).unsqueeze(0)
+        center2 = self.mc(embed2)
+
+        # Find distance between both centers
+        distance = F.pairwise_distance(center1, center2)
+
+        # Normalize and return output
+        output = 1 - torch.relu(torch.tanh(distance))
+        return output
 
 
 class SemanticSimilarity(nn.Module):
     """
     Calculates the semantic similarity between two sequences of words
-    by calculating the mean center that has been weighted with attention.
+    by calculating their mean center that has been weighted with attention.
     """
 
     def __init__(self, path=GLOVE_PATH):
@@ -118,14 +163,14 @@ class SemanticSimilarity(nn.Module):
         # Find the center of each sequence in latent space
         embed1 = self.embedding(seq1).unsqueeze(0)
         embed1 = self.attention(embed1.transpose(0, 1))
-        center1 = self.mc(embed1.transpose(1, 0).squeeze())
+        center1 = self.mc(embed1.transpose(1, 0))
 
         embed2 = self.embedding(seq2).unsqueeze(0)
         embed2 = self.attention(embed2.transpose(0, 1))
-        center2 = self.mc(embed2.transpose(1, 0).squeeze())
+        center2 = self.mc(embed2.transpose(1, 0))
 
         # Find distance between both centers
-        distance = center1.dist(center2)
+        distance = F.pairwise_distance(center1, center2)
 
         # Normalize and return output
         output = 1 - torch.relu(torch.tanh(distance))
