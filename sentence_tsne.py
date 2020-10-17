@@ -43,12 +43,15 @@ def visualize(seq1, seq2):
     seq2_data = torch.from_numpy(features[len(seq1_words):, :])
     center1 = center(seq1_data.unsqueeze(0)).squeeze()
     center2 = center(seq2_data.unsqueeze(0)).squeeze()
+    absolute_center = (center1 + center2) / 2
+    distance = int(100 * center1.dist(center2) + 0.5) / 100
 
     # Plot the graph
     print('Plotting the graph')
     plot_points(seq1_data, seq1_words, 'bo')
     plot_points(seq2_data, seq2_words, 'go')
     plt.plot(center1, center2, linestyle='--', marker='o', color='r', label='Center Distance')
+    plt.text(absolute_center[0], absolute_center[1] + 30, f'd={distance}', color='r', fontsize=12)
 
     # Set up legend
     handles = (
@@ -73,9 +76,9 @@ def plot_points(points, labels, point_type):
     labels (list of str): The labels for each point.
     point_type (str):     The point color and shape type.
     """
-    for (x, y), label in zip(points, labels):
-        plt.plot(x, y, point_type)
-        plt.text(x, y + 5, label, fontsize=12)
+    for (x_value, y_value), label in zip(points, labels):
+        plt.plot(x_value, y_value, point_type)
+        plt.text(x_value, y_value + 5, label, fontsize=12)
 
 
 if __name__ == '__main__':
