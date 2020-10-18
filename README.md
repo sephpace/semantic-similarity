@@ -12,6 +12,7 @@ A common problem in Natural Language Processing is to determine the closeness of
 
 ## Procedures
 I started by creating two modules: a dictionary to map words to GloVe embedding vectors and a function to find the center point of the given sentence. I then created a model that takes two sentences and finds each embedding vector using the dictionary then passes them through a transformer encoder. After the vectors have been modified, the center points and the distance between them were calculated. In order to determine the similarity percentages, the distances were passed into the function f(x)=1-max( 0, tanh(x) ). This was used to modify results to be in the range of 0 to 1 and gave smaller distances higher values and vice versa. (Fig. 2)  
+
 The model was trained for 100 epochs on the Text Similarity dataset (Sankineni, 2016). Loss was calculated using Binary Cross Entropy and the Adam optimizer with a learning rate of 10-5 was used for back propagation.
 
 **Figure 2:** Model structure.
